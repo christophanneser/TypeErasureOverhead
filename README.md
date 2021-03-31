@@ -8,3 +8,5 @@ For the sake of clean code, I first preferred using an abstract class which woul
 In this case, type erasures for iterators (as described here: http://thbecker.net/free_software_utilities/type_erasure_for_cpp_iterators/any_iterator.html) offer a working solution to this problem.
 
 However, type erasures come at the cost of virtual function calls, and this small benchmarks gives a very rough overview of the overhead I could expect for my research project.
+
+In the end, performance was more critical than exaggeratedly sticking to OO-patterns.
