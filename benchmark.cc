@@ -106,4 +106,6 @@ int main(int argc, char *argv[]) {
   std::cout << "index " << kKeys << " ints and perform " << kLookups << " lookups" << std::endl;
 
   RunBenchmark(kKeys, kLookups);
+
+  return 0;
 }
