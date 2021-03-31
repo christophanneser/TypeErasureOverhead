@@ -41,12 +41,10 @@ size_t TimedExecution(F f, Args &&... args) {
   return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 }
 
-int main() {
-  const size_t kN = 10'000'000;
-  const size_t kWorkloadSize = 10'000'000;
+void RunBenchmark(size_t kKeys, size_t kLookups) {
   Map<int, int> *vector_map = new VectorMap<int, int>();
 
-  std::vector<int> indexed_data(kN);
+  std::vector<int> indexed_data(kKeys);
   std::iota(indexed_data.begin(), indexed_data.end(), 0);
 
   std::vector<std::pair<int, int>> plain_vector;
@@ -55,8 +53,6 @@ int main() {
     vector_map->Add(k, k);
     plain_vector.emplace_back(k, k);
   }
-
-  std::shuffle(indexed_data.begin(), indexed_data.end(), std::mt19937(std::random_device()()));
 
   auto benchmark_type_erasure = [&](std::vector<int> &benchmark_data) {
     size_t fingerprint = 0;
@@ -82,7 +78,7 @@ int main() {
   std::vector<int> benchmark_data;
 
   std::cout << "run benchmark with uniform data..." << std::endl;
-  benchmark_data = CreateWorkload(UNIFORM, kN, kWorkloadSize);
+  benchmark_data = CreateWorkload(UNIFORM, kKeys, kLookups);
   auto time_type_erasure = TimedExecution(benchmark_type_erasure, benchmark_data);
   auto time_direct = TimedExecution(benchmark_direct, benchmark_data);
 
@@ -90,11 +86,24 @@ int main() {
   std::cout << "overhead with type erasure: " << time_type_erasure * 100 / time_direct - 100 << "%" << std::endl;
 
   std::cout << "run benchmark with uniform data..." << std::endl;
-  benchmark_data = CreateWorkload(NORMAl, kN, kWorkloadSize);
+  benchmark_data = CreateWorkload(NORMAl, kKeys, kLookups);
   time_type_erasure = TimedExecution(benchmark_type_erasure, benchmark_data);
   time_direct = TimedExecution(benchmark_direct, benchmark_data);
 
   std::cout << std::setprecision(3);
   std::cout << "overhead with type erasure: " << time_type_erasure * 100 / time_direct - 100 << "%" << std::endl;
-  return 0;
+}
+
+int main(int argc, char *argv[]) {
+  if (argc != 3) {
+    std::cout << "usage: <number index data> <number lookups>";
+    return 0;
+  }
+
+  const size_t kKeys = std::stoi(argv[1]);
+  const size_t kLookups = std::stoi(argv[2]);
+
+  std::cout << "index " << kKeys << " ints and perform " << kLookups << " lookups" << std::endl;
+
+  RunBenchmark(kKeys, kLookups);
 }
